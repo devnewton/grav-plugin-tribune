@@ -103,11 +103,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 case 'CITE':
                     if (e.target.innerText) {
                         this.palmipede.elements.message.value += e.target.innerText + "< ";
+                        this.palmipede.elements.message.focus();
                     }
                     break;
                 case 'TIME':
                     if (e.target.title) {
                         this.palmipede.elements.message.value += e.target.title + " ";
+                        this.palmipede.elements.message.focus();
                     }
                     break;
                 case 'MARK':
