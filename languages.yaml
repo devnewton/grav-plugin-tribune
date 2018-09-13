@@ -6,3 +6,7 @@ en:
     STYLE_VARIABLE_HELP: Style tribune with default embedded CSS or not
     STYLE_ENABLED: Default
     STYLE_DISABLED: None
+    TIMEZONE_VARIABLE: Timezone
+    TIMEZONE_VARIABLE_HELP: Timezone for norloges
+    MAXPOSTS_VARIABLE: Max posts
+    MAXPOSTS_VARIABLE_HELP: Tribune history size

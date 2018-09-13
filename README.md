@@ -1,8 +1,6 @@
 # Tribune Plugin
 
-**This README.md file should be modified to describe the features, installation, configuration, and general usage of this plugin.**
-
-The **Tribune** Plugin is for [Grav CMS](http://github.com/getgrav/grav). Tribune/shoutbox/webchat plugin
+The **Tribune** Plugin add simple tribune/shoutbox/webchat feature to [Grav CMS](http://github.com/getgrav/grav).
 
 ## Installation
 
@@ -38,19 +36,28 @@ Here is the default configuration and an explanation of available options:
 
 ```yaml
 enabled: true
+page: /tribune # Page where tribune will be visible
+style: true # Use default CSS to style the tribune 
+timezone: Europe/Paris # Timezone for message timestamps (aka norloges)
+maxPosts: 200 # History size
+maxMessageLength: 1024 # Message size limit
+maxLoginLength: 32 # Message's login size limit
+maxInfoLength: 64 # Message's additionnal info size limit
+maxLineLength: 2048 # Internal parameter that MUST be greater than sum of *Length options 
 ```
 
 Note that if you use the admin plugin, a file with your configuration, and named tribune.yaml will be saved in the `user/config/plugins/` folder once the configuration is saved in the admin.
 
 ## Usage
 
-**Describe how to use the plugin.**
+1. Create a page to show the tribune (default /tribune).
+2. Enjoy !
 
 ## Credits
 
-**Did you incorporate third-party code? Want to thank somebody?**
+This plugin use [PEG.js](https://pegjs.org/) to parse and format message.
 
 ## To Do
 
-- [ ] Future plans, if any
+- [ ] Handle user login
 

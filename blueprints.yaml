@@ -37,3 +37,16 @@ form:
         0: PLUGIN_TRIBUNE.STYLE_DISABLED
       label: PLUGIN_TRIBUNE.STYLE_VARIABLE
       help: PLUGIN_TRIBUNE.STYLE_VARIABLE_HELP
+    timezone:
+      type: text
+      default: "Europe/Paris"
+      label: PLUGIN_TRIBUNE.TIMEZONE_VARIABLE
+      help: PLUGIN_TRIBUNE.TIMEZONE_VARIABLE_HELP
+    maxPosts:
+      type: text
+      default: 200
+      validate:
+        type: number
+        min: 1
+      label: PLUGIN_TRIBUNE.MAXPOSTS_VARIABLE
+      help: PLUGIN_TRIBUNE.MAXPOSTS_VARIABLE_HELP
