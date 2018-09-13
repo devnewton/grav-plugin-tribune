@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var tribune = {
         posts: [],
         palmipede: document.getElementById("palmipede"),
+        tribune: document.getElementById('tribune'),
         init: function () {
             var self = this;
             fetch('/user/plugins/tribune/backend2html.pegjs').then(function (response) {
@@ -12,18 +13,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 setInterval(function () {
                     self.refresh();
                 }, 30000);
-            });
-            self.palmipede.addEventListener("submit", function (e) {
-                e.preventDefault();
-                fetch('?backend=tsv', {
-                    method: "POST",
-                    body: new FormData(self.palmipede)
-                }).then(function (response) {
-                    return response.text();
-                }).then(function (responseText) {
-                    self.parseBackend(responseText);
-                    self.palmipede.elements.message.value = '';
+                self.palmipede.addEventListener("submit", function (e) {
+                    e.preventDefault();
+                    fetch('?backend=tsv', {
+                        method: "POST",
+                        body: new FormData(self.palmipede)
+                    }).then(function (response) {
+                        return response.text();
+                    }).then(function (responseText) {
+                        self.parseBackend(responseText);
+                        self.palmipede.elements.message.value = '';
+                    });
                 });
+            });
+            self.tribune.addEventListener("mouseover", function (e) {
+                self.mouseEntered(e);
+            });
+            self.tribune.addEventListener("mouseout", function (e) {
+                self.mouseLeaved(e);
+            });
+            self.tribune.addEventListener("click", function (e) {
+                self.clicked(e);
             });
         },
         refresh: function () {
@@ -56,10 +66,56 @@ document.addEventListener('DOMContentLoaded', function () {
                     return elem.id === elem2.id;
                 }) === pos;
             });
-            document.getElementById('tribune').innerHTML = self.posts.reduce(function (html, post) {
+            self.tribune.innerHTML = self.posts.reduce(function (html, post) {
                 return html + '<article><time title="' + post.time + '">' + post.time.substr(11) + '</time> <cite title="' + post.info + '">' + (post.login || 'coward') + '</cite> <p>' + post.message + '</p></article>';
             }, '');
+        },
+        mouseEntered: function (e) {
+            switch (e.target.tagName) {
+                case 'TIME':
+                    if (e.target.title) {
+                        var times = document.getElementsByTagName('time');
+                        for (var i = 0; i < times.length; i++) {
+                            var time = times[i];
+                            if (time.title === e.target.title) {
+                                time.className = "highlighted";
+                            }
+                        }
+                    }
+                    break;
+            }
+        },
+        mouseLeaved: function (e) {
+            switch (e.target.tagName) {
+                case 'TIME':
+                    if (e.target.title) {
+                        var times = document.getElementsByTagName('time');
+                        for (var i = 0; i < times.length; i++) {
+                            var time = times[i];
+                            time.className = "";
+                        }
+                    }
+                    break;
+            }
+        },
+        clicked: function (e) {
+            switch (e.target.tagName) {
+                case 'CITE':
+                    if (e.target.innerText) {
+                        this.palmipede.elements.message.value += e.target.innerText + "< ";
+                    }
+                    break;
+                case 'TIME':
+                    if (e.target.title) {
+                        this.palmipede.elements.message.value += e.target.title + " ";
+                    }
+                    break;
+                case 'MARK':
+                    e.target.classList.toggle('revealed-spoiler');
+                    break;
+            }
         }
+
     };
     tribune.init();
 });

@@ -85,8 +85,8 @@ COIN;
         if($this->config->get('plugins.tribune.style')) {
             $this->grav['assets']->addCss('plugin://tribune/tribune.css');
         }
-        $this->grav['assets']->addJs('plugin://tribune/peg-0.10.0.js', null /*priority*/, true /* pipeline */, 'async' );
-        $this->grav['assets']->addJs('plugin://tribune/tribune.js', null /*priority*/, true /* pipeline */, 'async' );
+        $this->grav['assets']->addJs('plugin://tribune/peg-0.10.0.js', null /*priority*/, true /* pipeline */, 'defer' );
+        $this->grav['assets']->addJs('plugin://tribune/tribune.js', null /*priority*/, true /* pipeline */, 'defer' );
     }
     
     public function handlePost() {
