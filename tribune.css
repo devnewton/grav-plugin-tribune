@@ -1,0 +1,113 @@
+.tribune article:nth-of-type(odd) {
+	background-color: #FBFBFB;
+}
+
+.tribune article>time {
+	padding-right: 5px;
+	padding-left: 5px;
+	text-align: center;
+	color: black;
+	font-weight: bold;
+	white-space: nowrap;
+	display: inline-block;
+	vertical-align: text-top;
+        margin: auto;
+        cursor:pointer;
+}
+
+.tribune p time {
+    color: #5F7FBF;
+    cursor: pointer;
+}
+
+.tribune article>cite {
+	padding-right: 5px;
+	padding-left: 5px;
+	color: #833;
+	display: inline-block;
+	word-break: break-all;
+	vertical-align: text-top;
+        margin: auto;
+        cursor: pointer;
+}
+
+.tribune p {
+	padding-right: 5px;
+	padding-left: 5px;
+	color: black;
+	word-break: break-all;
+	display: inline-block;
+	vertical-align: text-top;
+        margin: auto;
+}
+
+.tribune p a {
+	font-weight: bold;
+	color: #1690f3;
+}
+
+.tribune p a:hover {
+	text-decoration: underline;
+}
+
+.tribune p a:visited {
+	color: #0b78d0;
+}
+
+.tribune p cite {
+	border: 1px solid #F00;
+        cursor: pointer;
+}
+
+.tribune p cite:after {
+	content: '<';
+}
+
+.tribune .highlighted {
+    background-color: #FFD202 !important;
+}
+
+.tribune figure {
+        display: inline;
+	position: relative;
+	font-weight: bold;
+	color: #0A1;
+        margin: unset;
+}
+
+.tribune figure img {
+	display: none;
+}
+
+.tribune figure:hover img {
+	display: inline;
+	position: absolute;
+	top: 100%;
+}
+
+.tribune mark {
+    background-color: black;
+    color: black;
+}
+
+.tribune mark:hover {
+    background-color: inherit;
+}
+
+.tribune .revealed-spoiler {
+    background-color: inherit;
+    color: red;
+}
+
+.tribune .jb3-bigorno {
+	border: 1px solid #F00;
+}
+
+.tribune .posts-enter-active, .posts-leave-active {
+  transition: all 1s;
+}
+
+.tribune .posts-enter, .posts-leave-to {
+  opacity: 0;
+  transform: translateX(100%);
+}

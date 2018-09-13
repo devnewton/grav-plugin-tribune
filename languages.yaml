@@ -1,0 +1,8 @@
+en:
+  PLUGIN_TRIBUNE:
+    PAGE_VARIABLE: Page
+    PAGE_VARIABLE_HELP: Page where tribune will be visible
+    STYLE_VARIABLE: Style
+    STYLE_VARIABLE_HELP: Style tribune with default embedded CSS or not
+    STYLE_ENABLED: Default
+    STYLE_DISABLED: None

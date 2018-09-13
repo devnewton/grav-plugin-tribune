@@ -1,0 +1,9 @@
+enabled: true
+page: /tribune
+style: true
+timezone: Europe/Paris
+maxPosts: 200
+maxMessageLength: 1024
+maxLoginLength: 32
+maxInfoLength: 64
+maxLineLength: 2048

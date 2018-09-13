@@ -1,0 +1,39 @@
+name: Tribune
+version: 0.1.0
+description: Tribune/shoutbox/webchat plugin
+icon: plug
+author:
+  name: devnewton
+  email: devnewton@bci.im
+homepage: https://github.com/devnewton/grav-plugin-tribune
+demo: http://perdu.com
+keywords: grav, plugin, etc
+bugs: https://github.com/devnewton/grav-plugin-tribune/issues
+docs: https://github.com/devnewton/grav-plugin-tribune/blob/develop/README.md
+license: MIT
+
+form:
+  validation: strict
+  fields:
+    enabled:
+      type: toggle
+      label: PLUGIN_ADMIN.PLUGIN_STATUS
+      highlight: 1
+      default: 0
+      options:
+        1: PLUGIN_ADMIN.ENABLED
+        0: PLUGIN_ADMIN.DISABLED
+      validate:
+        type: bool
+    page:
+      type: text
+      label: PLUGIN_TRIBUNE.PAGE_VARIABLE
+      help: PLUGIN_TRIBUNE.PAGE_VARIABLE_HELP
+    style:
+      type: toggle
+      default: 1
+      options:
+        1: PLUGIN_TRIBUNE.STYLE_ENABLED
+        0: PLUGIN_TRIBUNE.STYLE_DISABLED
+      label: PLUGIN_TRIBUNE.STYLE_VARIABLE
+      help: PLUGIN_TRIBUNE.STYLE_VARIABLE_HELP
