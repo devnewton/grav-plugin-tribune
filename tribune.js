@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     e.preventDefault();
                     fetch('?backend=tsv', {
                         method: "POST",
+                        credentials: 'include',
                         body: new FormData(self.palmipede)
                     }).then(function (response) {
                         return response.text();

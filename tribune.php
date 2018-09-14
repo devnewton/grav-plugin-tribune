@@ -35,16 +35,15 @@ class TribunePlugin extends Plugin {
 
         $uri = $this->grav['uri'];
         $page = $this->config->get('plugins.tribune.page');
-        if($page && $uri->path() == $page) {
-            if($uri->query('backend') === 'tsv') {
+        if ($page && $uri->path() == $page) {
+            if ($uri->query('backend') === 'tsv') {
                 $this->handlePost();
                 $this->enable([
                     'onPageInitialized' => ['deliverTSV', 0],
                 ]);
-            } else  {
+            } else {
                 $this->enable([
                     'onPageContentRaw' => ['onPageContentRaw', 0],
-                    'onOutputGenerated' => ['onOutputGenerated', 0],
                     'onAssetsInitialized' => ['onAssetsInitialized', 0]
                 ]);
             }
@@ -74,35 +73,32 @@ COIN;
         $e['page']->setRawContent($text . "\n\n" . $content);
     }
 
-    public function onOutputGenerated() {
-        $text = <<<COIN
-<strong>coincoin1</strong>
-COIN;
-        $this->grav->output = $this->grav->output . $text;
-    }
-
     public function onAssetsInitialized() {
-        if($this->config->get('plugins.tribune.style')) {
+        if ($this->config->get('plugins.tribune.style')) {
             $this->grav['assets']->addCss('plugin://tribune/tribune.css');
         }
-        $this->grav['assets']->addJs('plugin://tribune/peg-0.10.0.js', null /*priority*/, true /* pipeline */, 'defer' );
-        $this->grav['assets']->addJs('plugin://tribune/tribune.js', null /*priority*/, true /* pipeline */, 'defer' );
+        $this->grav['assets']->addJs('plugin://tribune/peg-0.10.0.js', null /* priority */, true /* pipeline */, 'defer');
+        $this->grav['assets']->addJs('plugin://tribune/tribune.js', null /* priority */, true /* pipeline */, 'defer');
     }
-    
+
     public function handlePost() {
         $message = mb_substr(filter_input(INPUT_POST, 'message', FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW), 0, $this->config->get('plugins.tribune.maxMessageLength'));
-        $login = trim(mb_substr(filter_input(INPUT_POST, 'login', FILTER_SANITIZE_EMAIL), 0, $this->config->get('plugins.tribune.maxLoginLength')));
-        $info = trim(mb_substr(filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_EMAIL), 0, $this->config->get('plugins.tribune.maxInfoLength')));
-        if (!mb_detect_encoding($login, 'UTF-8', true)) {
-            $login = "";
-        }
-        if (!mb_detect_encoding($info, 'UTF-8', true)) {
-            $info = "relou";
-        }
-        if (mb_strlen($login) === 0 && mb_strlen($info) === 0) {
-            $info = "coward";
-        }
         if (mb_strlen(trim($message)) > 0 && mb_detect_encoding($message, 'UTF-8', true)) {
+            $info = trim(mb_substr(filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_EMAIL), 0, $this->config->get('plugins.tribune.maxInfoLength')));
+            $login = '';
+            if (isset($this->grav['twig'])) {
+                $user = $this->grav['user'];
+                $login = trim(mb_substr($user->get('username', ''), 0, $this->config->get('plugins.tribune.maxLoginLength')));
+            }
+            if (!mb_detect_encoding($login, 'UTF-8', true)) {
+                $login = "";
+            }
+            if (!mb_detect_encoding($info, 'UTF-8', true)) {
+                $info = "relou";
+            }
+            if (mb_strlen($login) === 0 && mb_strlen($info) === 0) {
+                $info = "coward";
+            }
             $file = fopen(DATA_DIR . 'tribune.tsv', "c+");
             flock($file, LOCK_EX);
             $newPostId = 0;
@@ -127,7 +123,7 @@ COIN;
             fclose($file);
         }
     }
-    
+
     public function deliverTSV() {
         $lastId = filter_input(INPUT_POST, 'lastId', FILTER_VALIDATE_INT, array('options' => array('default' => 0)));
         header("Content-Type: text/tab-separated-values");
@@ -148,4 +144,5 @@ COIN;
         fclose($outstream);
         exit();
     }
+
 }
