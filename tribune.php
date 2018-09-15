@@ -61,8 +61,13 @@ class TribunePlugin extends Plugin {
         $text = <<<COIN
 <form id="palmipede" accept-charset="UTF-8" enctype="application/x-www-form-urlencoded" autofocus="autofocus" class="palmipede">
     <input name="message" placeholder="message" spellcheck="true">
-    <button type="submit">Post</button>
-    <input name="info" placeholder="info (aka nickname)">
+    <button type="submit" class="button">Post</button>
+    <span id="palmipede-showextras-button">&#x2699;</span>
+    <fieldset id="palmipede-extras">
+		<label>Info
+			<input id="palmipede-extras-info" name="info" placeholder="nickname or status">
+		</label>
+	</fieldset>
     </form>
 <div id="tribune" class="tribune"></div>
 COIN;

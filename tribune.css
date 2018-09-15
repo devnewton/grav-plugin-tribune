@@ -116,3 +116,12 @@
   opacity: 0;
   transform: translateX(100%);
 }
+
+#palmipede-showextras-button {
+	cursor: pointer;
+}
+
+#palmipede-extras {
+	display: none;
+	margin-top: 8px;
+}

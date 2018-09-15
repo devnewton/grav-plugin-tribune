@@ -36,6 +36,11 @@ document.addEventListener('DOMContentLoaded', function () {
             self.tribune.addEventListener("click", function (e) {
                 self.clicked(e);
             });
+            document.getElementById('palmipede-showextras-button').addEventListener("click", function (e) {
+                var palmipedeExtras = document.getElementById('palmipede-extras');
+                console.log(palmipedeExtras.style.display);
+				palmipedeExtras.style.display = palmipedeExtras.style.display ? '' : 'block';
+            });
         },
         refresh: function () {
             var self = this;
