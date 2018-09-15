@@ -62,11 +62,12 @@ class TribunePlugin extends Plugin {
 <form id="palmipede" accept-charset="UTF-8" enctype="application/x-www-form-urlencoded" autofocus="autofocus" class="palmipede">
     <input name="message" placeholder="message" spellcheck="true">
     <button type="submit" class="button">Post</button>
-    <span id="palmipede-showextras-button">&#x2699;</span>
+    <span id="palmipede-showextras-button" title="Show/hide tribune preferences">&#x2699;</span>
     <fieldset id="palmipede-extras">
-		<label>Info
-			<input id="palmipede-extras-info" name="info" placeholder="nickname or status">
+		<label class="form-label">Info
+			<input id="palmipede-extras-info" class="form-input" name="info" placeholder="nickname or status">
 		</label>
+		<button id="palmipede-extras-save" class="button">Save my preferences in local storage.</button>
 	</fieldset>
     </form>
 <div id="tribune" class="tribune"></div>

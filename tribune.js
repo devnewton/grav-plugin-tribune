@@ -41,6 +41,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log(palmipedeExtras.style.display);
 				palmipedeExtras.style.display = palmipedeExtras.style.display ? '' : 'block';
             });
+            document.getElementById('palmipede-extras-info').value = localStorage.getItem('tribune-info');
+            document.getElementById('palmipede-extras-save').addEventListener("click", function (e) {
+				localStorage.setItem('tribune-info', document.getElementById('palmipede-extras-info').value);
+			});
         },
         refresh: function () {
             var self = this;
