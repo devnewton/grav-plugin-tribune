@@ -62,6 +62,7 @@ class TribunePlugin extends Plugin {
 <form id="palmipede" accept-charset="UTF-8" enctype="application/x-www-form-urlencoded" autofocus="autofocus" class="palmipede">
     <input name="message" placeholder="message" spellcheck="true">
     <button type="submit">Post</button>
+    <input name="info" placeholder="info (aka nickname)">
     </form>
 <div id="tribune" class="tribune"></div>
 COIN;
@@ -84,7 +85,10 @@ COIN;
     public function handlePost() {
         $message = mb_substr(filter_input(INPUT_POST, 'message', FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW), 0, $this->config->get('plugins.tribune.maxMessageLength'));
         if (mb_strlen(trim($message)) > 0 && mb_detect_encoding($message, 'UTF-8', true)) {
-            $info = trim(mb_substr(filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_EMAIL), 0, $this->config->get('plugins.tribune.maxInfoLength')));
+            $info = trim(mb_substr(filter_input(INPUT_POST, 'info', FILTER_SANITIZE_EMAIL), 0, $this->config->get('plugins.tribune.maxInfoLength')));
+            if(mb_strlen($info) === 0) {
+				$info = trim(mb_substr(filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_EMAIL), 0, $this->config->get('plugins.tribune.maxInfoLength')));
+            }
             $login = '';
             if (isset($this->grav['twig'])) {
                 $user = $this->grav['user'];
