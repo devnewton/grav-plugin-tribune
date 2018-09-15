@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }) === pos;
             });
             self.tribune.innerHTML = self.posts.reduce(function (html, post) {
-                return html + '<article><time title="' + post.time + '">' + post.time.substr(11) + '</time> <cite title="' + post.info + '">' + (post.login || 'coward') + '</cite> <p>' + post.message + '</p></article>';
+                return html + '<article><time title="' + post.time + '">' + post.time.substr(11) + '</time> <cite title="' + post.info + '"' + (post.login ? 'class="login"' : '')+ '>' + (post.login || post.info) + '</cite> <p>' + post.message + '</p></article>';
             }, '');
         },
         mouseEntered: function (e) {

@@ -63,6 +63,11 @@
 	content: '<';
 }
 
+.tribune .login {
+    font-style: normal;
+}
+
+
 .tribune .highlighted {
     background-color: #FFD202 !important;
 }
