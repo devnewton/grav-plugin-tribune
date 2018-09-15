@@ -53,6 +53,15 @@ Note that if you use the admin plugin, a file with your configuration, and named
 1. Create a page to show the tribune (default /tribune).
 2. Enjoy !
 
+## HTTP API
+
+Retrieve and post messages using simple HTTP GET/POST calls:
+
+```
+curl -X GET 'https://grav-plugin-tribune-demo.bci.im/tribune?backend=tsv'
+curl -X POST -F 'message=hello' 'https://grav-plugin-tribune-demo.bci.im/tribune?backend=tsv'
+```
+
 ## Credits
 
 This plugin use [PEG.js](https://pegjs.org/) to parse and format message.
