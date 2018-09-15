@@ -6,7 +6,7 @@ author:
   name: devnewton
   email: devnewton@bci.im
 homepage: https://github.com/devnewton/grav-plugin-tribune
-demo: http://perdu.com
+demo: https://grav-plugin-tribune-demo.bci.im/tribune
 keywords: grav, plugin, etc
 bugs: https://github.com/devnewton/grav-plugin-tribune/issues
 docs: https://github.com/devnewton/grav-plugin-tribune/blob/develop/README.md
