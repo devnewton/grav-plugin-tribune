@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     var tribune = {
         posts: [],
+        lastId: 0,
         palmipede: document.getElementById("palmipede"),
         tribune: document.getElementById('tribune'),
         init: function () {
@@ -15,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }, 30000);
                 self.palmipede.addEventListener("submit", function (e) {
                     e.preventDefault();
-                    fetch('?backend=tsv', {
+                    fetch('?backend=tsv&lastId=' + self.lastId, {
                         method: "POST",
                         credentials: 'include',
                         body: new FormData(self.palmipede)
@@ -48,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         refresh: function () {
             var self = this;
-            fetch('?backend=tsv').then(function (response) {
+            fetch('?backend=tsv&lastId=' + self.lastId).then(function (response) {
                 return response.text();
             }).then(function (responseText) {
                 self.parseBackend(responseText);
@@ -76,6 +77,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     return elem.id === elem2.id;
                 }) === pos;
             });
+            self.lastId = self.posts.reduce(function(lastId, post){
+				return Math.max(lastId, post.id);
+			}, self.lastId);
             self.tribune.innerHTML = self.posts.reduce(function (html, post) {
                 return html + '<article><time title="' + post.time + '">' + post.time.substr(11) + '</time> <cite title="' + post.info + '"' + (post.login ? 'class="login"' : '')+ '>' + (post.login || post.info) + '</cite> <p>' + post.message + '</p></article>';
             }, '');

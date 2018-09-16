@@ -135,7 +135,7 @@ COIN;
     }
 
     public function deliverTSV() {
-        $lastId = filter_input(INPUT_POST, 'lastId', FILTER_VALIDATE_INT, array('options' => array('default' => 0)));
+        $lastId = filter_input(INPUT_GET, 'lastId', FILTER_VALIDATE_INT, array('options' => array('default' => 0)));
         header("Content-Type: text/tab-separated-values");
         $file = fopen(DATA_DIR . 'tribune.tsv', "r");
         $posts = array();
