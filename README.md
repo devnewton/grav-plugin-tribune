@@ -2,6 +2,10 @@
 
 The **Tribune** Plugin add simple tribune/shoutbox/webchat feature to [Grav CMS](http://github.com/getgrav/grav).
 
+## Demo
+
+**[Click here](https://grav-plugin-tribune-demo.bci.im/tribune)**  to see the plugin in action.
+
 ## Installation
 
 Installing the Tribune plugin can be done in one of two ways. The GPM (Grav Package Manager) installation method enables you to quickly and easily install the plugin with a simple terminal command, while the manual method enables you to do so via a zip file.
