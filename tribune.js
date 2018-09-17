@@ -4,30 +4,22 @@ document.addEventListener('DOMContentLoaded', function () {
         lastId: 0,
         palmipede: document.getElementById("palmipede"),
         tribune: document.getElementById('tribune'),
+        backend2html: peg.generate(document.getElementById('tribune-backend2html').innerText),
         init: function () {
             var self = this;
-            fetch('/user/plugins/tribune/backend2html.pegjs').then(function (response) {
-                return response.text();
-            }).then(function (responseText) {
-                self.taab_backend2html = peg.generate(responseText);
-                self.refresh();
-                setInterval(function () {
-                    self.refresh();
-                }, 30000);
-                self.palmipede.addEventListener("submit", function (e) {
-                    e.preventDefault();
-                    fetch('?backend=tsv&lastId=' + self.lastId, {
-                        method: "POST",
-                        credentials: 'include',
-                        body: new FormData(self.palmipede)
-                    }).then(function (response) {
-                        return response.text();
-                    }).then(function (responseText) {
-                        self.parseBackend(responseText);
-                        self.palmipede.elements.message.value = '';
-                    });
-                });
-            });
+			self.palmipede.addEventListener("submit", function (e) {
+				e.preventDefault();
+				fetch('?backend=tsv&lastId=' + self.lastId, {
+					method: "POST",
+					credentials: 'include',
+					body: new FormData(self.palmipede)
+				}).then(function (response) {
+					return response.text();
+				}).then(function (responseText) {
+					self.parseBackend(responseText);
+					self.palmipede.elements.message.value = '';
+				});
+			});
             self.tribune.addEventListener("mouseover", function (e) {
                 self.mouseEntered(e);
             });
@@ -46,6 +38,10 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('palmipede-extras-save').addEventListener("click", function (e) {
 				localStorage.setItem('tribune-info', document.getElementById('palmipede-extras-info').value);
 			});
+			self.refresh();
+			setInterval(function () {
+				self.refresh();
+			}, 30000);
         },
         refresh: function () {
             var self = this;
@@ -62,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (post.length >= 5) {
                     var time = post[1];
                     var formattedTime = time.substr(0, 4) + "-" + time.substr(4, 2) + "-" + time.substr(6, 2) + "T" + time.substr(8, 2) + ":" + time.substr(10, 2) + ":" + time.substr(12, 2);
-                    var htmlMessage = self.taab_backend2html.parse(post[4]);
+                    var htmlMessage = self.backend2html.parse(post[4]);
                     return {id: post[0], time: formattedTime, info: post[2], login: post[3], message: htmlMessage};
                 } else {
                     return false;

@@ -71,6 +71,13 @@ class TribunePlugin extends Plugin {
 	</fieldset>
     </form>
 <div id="tribune" class="tribune"></div>
+<script id="tribune-backend2html" type="text/peg">
+COIN
+.
+file_get_contents(__DIR__ . '/backend2html.pegjs')
+.
+<<<COIN
+</script>
 COIN;
 
         // Get the current raw content
