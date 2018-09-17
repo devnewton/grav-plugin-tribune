@@ -72,5 +72,5 @@ This plugin use [PEG.js](https://pegjs.org/) to parse and format message.
 
 ## To Do
 
-- [ ] Handle user login
+- [ ] Configurable totoz server
 
