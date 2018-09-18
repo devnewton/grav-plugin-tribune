@@ -40,7 +40,7 @@ Here is the default configuration and an explanation of available options:
 
 ```yaml
 enabled: true
-page: /tribune # Page where tribune will be visible
+page: /tribune # Page where tribune will be visible, YOU HAVE TO CREATE THIS PAGE FOR IT TO BE VISIBLE IN MENUS/COLLECTIONS/...
 style: true # Use default CSS to style the tribune 
 timezone: Europe/Paris # Timezone for message timestamps (aka norloges)
 maxPosts: 200 # History size
