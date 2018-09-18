@@ -3,6 +3,7 @@
 namespace Grav\Plugin;
 
 use Grav\Common\Plugin;
+use Grav\Common\Page\Page;
 use RocketTheme\Toolbox\Event\Event;
 
 /**
@@ -23,7 +24,8 @@ class TribunePlugin extends Plugin {
      */
     public static function getSubscribedEvents() {
         return [
-            'onPluginsInitialized' => ['onPluginsInitialized', 0]
+            'onPluginsInitialized' => ['onPluginsInitialized', 0],
+            'onTwigTemplatePaths'       => ['onTwigTemplatePaths', 0]
         ];
     }
 
@@ -43,6 +45,7 @@ class TribunePlugin extends Plugin {
                 ]);
             } else {
                 $this->enable([
+                    'onPagesInitialized' => ['addTribuneIfItDoesNotExistsPage', 1],
                     'onPageContentRaw' => ['onPageContentRaw', 0],
                     'onAssetsInitialized' => ['onAssetsInitialized', 0]
                 ]);
@@ -57,8 +60,13 @@ class TribunePlugin extends Plugin {
      * @param Event $e
      */
     public function onPageContentRaw(Event $e) {
-        // Get a variable from the plugin configuration
-        $text = <<<COIN
+        $this->addTribuneHtmlToPageIfNeeded($e['page']);
+    }
+    
+    private function addTribuneHtmlToPageIfNeeded($page) {
+        $content = $page->getRawContent();
+        if(mb_strstr($content, 'tribune-backend2html') === FALSE) {
+            $text = <<<COIN
 <form id="palmipede" accept-charset="UTF-8" enctype="application/x-www-form-urlencoded" autofocus="autofocus" class="palmipede">
     <input name="message" placeholder="message" spellcheck="true">
     <button type="submit" class="button">Post</button>
@@ -73,18 +81,14 @@ class TribunePlugin extends Plugin {
 <div id="tribune" class="tribune"></div>
 <script id="tribune-backend2html" type="text/peg">
 COIN
-.
-file_get_contents(__DIR__ . '/backend2html.pegjs')
-.
-<<<COIN
+                .
+                file_get_contents(__DIR__ . '/backend2html.pegjs')
+                .
+                <<<COIN
 </script>
 COIN;
-
-        // Get the current raw content
-        $content = $e['page']->getRawContent();
-
-        // Prepend the output with the custom text and set back on the page
-        $e['page']->setRawContent($text . "\n\n" . $content);
+            $page->setRawContent($text . "\n\n" . $content);
+        }
     }
 
     public function onAssetsInitialized() {
@@ -99,8 +103,8 @@ COIN;
         $message = mb_substr(filter_input(INPUT_POST, 'message', FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW), 0, $this->config->get('plugins.tribune.maxMessageLength'));
         if (mb_strlen(trim($message)) > 0 && mb_detect_encoding($message, 'UTF-8', true)) {
             $info = trim(mb_substr(filter_input(INPUT_POST, 'info', FILTER_SANITIZE_EMAIL), 0, $this->config->get('plugins.tribune.maxInfoLength')));
-            if(mb_strlen($info) === 0) {
-				$info = trim(mb_substr(filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_EMAIL), 0, $this->config->get('plugins.tribune.maxInfoLength')));
+            if (mb_strlen($info) === 0) {
+                $info = trim(mb_substr(filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_EMAIL), 0, $this->config->get('plugins.tribune.maxInfoLength')));
             }
             $login = '';
             if (isset($this->grav['twig'])) {
@@ -160,6 +164,24 @@ COIN;
         }
         fclose($outstream);
         exit();
+    }
+
+    public function addTribuneIfItDoesNotExistsPage() {
+        $pages = $this->grav['pages'];
+        $route = $this->config->get('plugins.tribune.page');
+        $page = $pages->dispatch($route);
+        if (!$page) {
+            $page = new Page;
+            $page->init(new \SplFileInfo(__DIR__ . '/pages/tribune.md'));
+            $page->slug(basename($route));
+            $this->addTribuneHtmlToPageIfNeeded($page);
+            $pages->addPage($page, $route);
+        }
+    }
+
+    public function onTwigTemplatePaths() {
+        $twig = $this->grav['twig'];
+        $twig->twig_paths[] = __DIR__ . '/templates';
     }
 
 }
