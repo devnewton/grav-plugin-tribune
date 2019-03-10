@@ -6,8 +6,8 @@ author:
   name: devnewton
   email: devnewton@bci.im
 homepage: https://github.com/devnewton/grav-plugin-tribune
-demo: https://grav-plugin-tribune-demo.bci.im/tribune
-keywords: grav, plugin, etc
+demo: https://raw.githubusercontent.com/devnewton/grav-plugin-tribune/master/screenshot.png
+keywords: grav, plugin, tribune, shootbox, chat
 bugs: https://github.com/devnewton/grav-plugin-tribune/issues
 docs: https://github.com/devnewton/grav-plugin-tribune/blob/master/README.md
 license: MIT
