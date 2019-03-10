@@ -2,9 +2,7 @@
 
 The **Tribune** Plugin add simple tribune/shoutbox/webchat feature to [Grav CMS](http://github.com/getgrav/grav).
 
-## Demo
-
-**[Click here](https://grav-plugin-tribune-demo.bci.im/tribune)**  to see the plugin in action.
+![Screenshot](screenshot.png)
 
 ## Installation
 
