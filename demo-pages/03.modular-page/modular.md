@@ -1,7 +1,7 @@
 ---
 title: Modular w/ Tribune
 content:
-    items: @self.modular
+    items: '@self.modular'
 onpage_menu: false
 tribune:
     show: true

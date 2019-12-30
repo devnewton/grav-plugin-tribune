@@ -1,5 +1,5 @@
 ---
-title: Contains Tribune
+title: With Tribune
 tribune:
     show: true
 ---
