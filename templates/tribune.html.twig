@@ -1,5 +1,9 @@
 {% extends 'partials/base.html.twig' %}
 
 {% block content %}
+    {% if page.header.tribune.show %}
+        {% include 'partials/tribune.html.twig' %}
+    {% endif %}
+
     {{ page.content }}
 {% endblock %}
