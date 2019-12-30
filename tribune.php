@@ -12,6 +12,9 @@ use RocketTheme\Toolbox\Event\Event;
  */
 class TribunePlugin extends Plugin {
 
+    private $page = null;
+    private $runBackwardsCompatible = false;
+
     /**
      * @return array
      *
@@ -25,7 +28,7 @@ class TribunePlugin extends Plugin {
     public static function getSubscribedEvents() {
         return [
             'onPluginsInitialized' => ['onPluginsInitialized', 0],
-            'onTwigTemplatePaths'       => ['onTwigTemplatePaths', 0]
+            'onTwigTemplatePaths'  => ['onTwigTemplatePaths', 0],
         ];
     }
 
@@ -36,8 +39,10 @@ class TribunePlugin extends Plugin {
         }
 
         $uri = $this->grav['uri'];
-        $page = $this->config->get('plugins.tribune.page');
-        if ($page && $uri->path() == $page) {
+        $pagePath = $this->config->get('plugins.tribune.page');
+        $this->runBackwardsCompatible = $pagePath && $uri->path() == $pagePath;
+
+        if ($this->runBackwardsCompatible) {
             if ($uri->query('backend') === 'tsv') {
                 $this->handlePost();
                 $this->enable([
@@ -50,7 +55,31 @@ class TribunePlugin extends Plugin {
                     'onAssetsInitialized' => ['onAssetsInitialized', 0]
                 ]);
             }
+        } else {
+            $this->enable([
+                'onPageInitialized' => ['onPageInitialized', 0],
+            ]);
         }
+    }
+
+    public function onPageInitialized($event) {
+        $this->page = $event['page'];
+        $header = $this->page->header();
+        $uri = $this->grav['uri'];
+
+        if (isset($header->tribune['show']) && $header->tribune['show'] == true) {
+            if ($uri->query('backend') === 'tsv') {
+                $this->handlePost();
+                $this->deliverTSV();
+            }
+
+            // 'onAssetsInitialize' event has already been fired. Call assets manually.
+            $this->addAssets();
+        }
+    }
+
+    private function addAssets() {
+        $this->onAssetsInitialized();
     }
 
     /**
@@ -62,7 +91,7 @@ class TribunePlugin extends Plugin {
     public function onPageContentRaw(Event $e) {
         $this->addTribuneHtmlToPageIfNeeded($e['page']);
     }
-    
+
     private function addTribuneHtmlToPageIfNeeded($page) {
         $content = $page->getRawContent();
         if(mb_strstr($content, 'tribune-backend2html') === FALSE) {
@@ -127,7 +156,18 @@ COIN;
             if (mb_strlen($login) === 0 && mb_strlen($info) === 0) {
                 $info = "coward";
             }
-            $file = fopen(DATA_DIR . 'tribune.tsv', "c+");
+
+            if ($this->runBackwardsCompatible) {
+                $file = fopen(DATA_DIR . 'tribune.tsv', "c+");
+            } else {
+                $foldername = DATA_DIR . 'tribune';
+
+                if (!file_exists($foldername)) {
+                    mkdir($foldername);
+                }
+                $file = fopen(DATA_DIR . 'tribune/' . $this->page->slug() . '.tsv', "c+");
+            }
+
             flock($file, LOCK_EX);
             $newPostId = 0;
             $newPosts = array();
@@ -153,15 +193,27 @@ COIN;
     }
 
     public function deliverTSV() {
+        if ($this->runBackwardsCompatible) {
+            $datafile = DATA_DIR . 'tribune.tsv';
+        } else {
+            $datafile = DATA_DIR . 'tribune/' . $this->page->slug() . '.tsv';
+        }
+
+        if (!file_exists($datafile)) {
+            return;
+        }
+
         $lastId = filter_input(INPUT_GET, 'lastId', FILTER_VALIDATE_INT, array('options' => array('default' => 0)));
         header("Content-Type: text/tab-separated-values");
-        $file = fopen(DATA_DIR . 'tribune.tsv', "r");
+        $file = fopen($datafile, "r");
+
         $posts = array();
         $maxLineLength = $this->config->get('plugins.tribune.maxLineLength');
         while (($post = fgetcsv($file, $maxLineLength, "\t")) !== FALSE) {
             $posts[] = $post;
         }
         fclose($file);
+
         $outstream = fopen("php://output", 'w');
         foreach ($posts as $post) {
             if ($post[0] > $lastId) {
@@ -190,5 +242,4 @@ COIN;
         $twig = $this->grav['twig'];
         $twig->twig_paths[] = __DIR__ . '/templates';
     }
-
 }
