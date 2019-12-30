@@ -79,24 +79,31 @@ class TribunePlugin extends Plugin {
 	</fieldset>
     </form>
 <div id="tribune" class="tribune"></div>
-<script id="tribune-backend2html" type="text/peg">
-COIN
-                .
-                file_get_contents(__DIR__ . '/backend2html.pegjs')
-                .
-                <<<COIN
-</script>
 COIN;
             $page->setRawContent($text . "\n\n" . $content);
         }
     }
 
     public function onAssetsInitialized() {
+        $assetMngr = $this->grav['assets'];
+
         if ($this->config->get('plugins.tribune.style')) {
-            $this->grav['assets']->addCss('plugin://tribune/tribune.css');
+            $assetMngr->addCss('plugin://tribune/tribune.css');
         }
-        $this->grav['assets']->addJs('plugin://tribune/peg-0.10.0.js', null /* priority */, true /* pipeline */, 'defer');
-        $this->grav['assets']->addJs('plugin://tribune/tribune.js', null /* priority */, true /* pipeline */, 'defer');
+
+        $assetMngr->addJs('plugin://tribune/peg-0.10.0.js',  [
+            'group' => 'head',
+            'loading' => 'defer',
+        ]);
+        $assetMngr->addJs('plugin://tribune/tribune.js', [
+            'group' => 'head',
+            'loading' => 'defer',
+        ]);
+        $assetMngr->addJs('plugin://tribune/backend2html.pegjs', [
+            'id' => 'tribune-backend2html',
+            'group' => 'bottom',
+            'loading' => 'inline',
+        ]);
     }
 
     public function handlePost() {
