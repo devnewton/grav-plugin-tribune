@@ -14,6 +14,7 @@ class TribunePlugin extends Plugin {
 
     private $page = null;
     private $runBackwardsCompatible = false;
+    private $mergedConfig = null;
 
     /**
      * @return array
@@ -67,6 +68,8 @@ class TribunePlugin extends Plugin {
         $header = $this->page->header();
         $uri = $this->grav['uri'];
 
+        $this->mergedConfig = $this->mergeConfig($this->page);
+
         $templateNotDisabled = $this->page->template() === 'tribune' &&
                 (!isset($header->tribune['show']) || $header->tribune['show'] !== false);
         $show = isset($header->tribune['show']) &&  $header->tribune['show'] === true;
@@ -84,6 +87,15 @@ class TribunePlugin extends Plugin {
 
     private function addAssets() {
         $this->onAssetsInitialized();
+    }
+
+    private function getConfig($item) {
+        if ($this->runBackwardsCompatible) {
+            return $this->config->get($item);
+        } else {
+            $slices = array_slice(\explode('.', $item), -1);
+            return $this->mergedConfig->get($slices[0]);
+        }
     }
 
     /**
@@ -120,7 +132,7 @@ COIN;
     public function onAssetsInitialized() {
         $assetMngr = $this->grav['assets'];
 
-        if ($this->config->get('plugins.tribune.style')) {
+        if ($this->getConfig('plugins.tribune.style')) {
             $assetMngr->addCss('plugin://tribune/tribune.css');
         }
 
@@ -140,16 +152,16 @@ COIN;
     }
 
     public function handlePost() {
-        $message = mb_substr(filter_input(INPUT_POST, 'message', FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW), 0, $this->config->get('plugins.tribune.maxMessageLength'));
+        $message = mb_substr(filter_input(INPUT_POST, 'message', FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW), 0, $this->getConfig('plugins.tribune.maxMessageLength'));
         if (mb_strlen(trim($message)) > 0 && mb_detect_encoding($message, 'UTF-8', true)) {
-            $info = trim(mb_substr(filter_input(INPUT_POST, 'info', FILTER_SANITIZE_EMAIL), 0, $this->config->get('plugins.tribune.maxInfoLength')));
+            $info = trim(mb_substr(filter_input(INPUT_POST, 'info', FILTER_SANITIZE_EMAIL), 0, $this->getConfig('plugins.tribune.maxInfoLength')));
             if (mb_strlen($info) === 0) {
-                $info = trim(mb_substr(filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_EMAIL), 0, $this->config->get('plugins.tribune.maxInfoLength')));
+                $info = trim(mb_substr(filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_EMAIL), 0, $this->getConfig('plugins.tribune.maxInfoLength')));
             }
             $login = '';
             if (isset($this->grav['twig'])) {
                 $user = $this->grav['user'];
-                $login = trim(mb_substr($user->get('username', ''), 0, $this->config->get('plugins.tribune.maxLoginLength')));
+                $login = trim(mb_substr($user->get('username', ''), 0, $this->getConfig('plugins.tribune.maxLoginLength')));
             }
             if (!mb_detect_encoding($login, 'UTF-8', true)) {
                 $login = "";
@@ -175,17 +187,17 @@ COIN;
             flock($file, LOCK_EX);
             $newPostId = 0;
             $newPosts = array();
-            $maxLineLength = $this->config->get('plugins.tribune.maxLineLength');
+            $maxLineLength = $this->getConfig('plugins.tribune.maxLineLength');
             while (($post = fgetcsv($file, $maxLineLength, "\t")) !== FALSE) {
                 $newPosts[] = $post;
                 $newPostId = max($newPostId, $post[0]);
             }
             ++$newPostId;
             header('X-Post-Id: ' . $newPostId);
-            $dateTime = date_create("now", timezone_open($this->config->get('plugins.tribune.timezone')));
+            $dateTime = date_create("now", timezone_open($this->getConfig('plugins.tribune.timezone')));
             $time = date_format($dateTime, 'YmdHis');
             array_unshift($newPosts, array($newPostId, $time, $info, $login, $message));
-            array_splice($newPosts, $this->config->get('plugins.tribune.maxPosts'));
+            array_splice($newPosts, $this->getConfig('plugins.tribune.maxPosts'));
             ftruncate($file, 0);
             fseek($file, 0);
             foreach ($newPosts as $post) {
@@ -212,7 +224,7 @@ COIN;
         $file = fopen($datafile, "r");
 
         $posts = array();
-        $maxLineLength = $this->config->get('plugins.tribune.maxLineLength');
+        $maxLineLength = $this->getConfig('plugins.tribune.maxLineLength');
         while (($post = fgetcsv($file, $maxLineLength, "\t")) !== FALSE) {
             $posts[] = $post;
         }
@@ -231,7 +243,7 @@ COIN;
 
     public function addTribuneIfItDoesNotExistsPage() {
         $pages = $this->grav['pages'];
-        $route = $this->config->get('plugins.tribune.page');
+        $route = $this->getConfig('plugins.tribune.page');
         $page = $pages->dispatch($route);
         if (!$page) {
             $page = new Page;
