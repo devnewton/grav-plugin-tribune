@@ -67,7 +67,11 @@ class TribunePlugin extends Plugin {
         $header = $this->page->header();
         $uri = $this->grav['uri'];
 
-        if (isset($header->tribune['show']) && $header->tribune['show'] == true) {
+        $templateNotDisabled = $this->page->template() === 'tribune' &&
+                (!isset($header->tribune['show']) || $header->tribune['show'] !== false);
+        $show = isset($header->tribune['show']) &&  $header->tribune['show'] === true;
+
+        if ($templateNotDisabled || $show) {
             if ($uri->query('backend') === 'tsv') {
                 $this->handlePost();
                 $this->deliverTSV();
