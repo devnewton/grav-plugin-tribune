@@ -59,6 +59,7 @@ class TribunePlugin extends Plugin {
         } else {
             $this->enable([
                 'onPageInitialized' => ['onPageInitialized', 0],
+                'onTwigSiteVariables' => ['onTwigSiteVariables'],
             ]);
         }
     }
@@ -70,11 +71,10 @@ class TribunePlugin extends Plugin {
 
         $this->mergedConfig = $this->mergeConfig($this->page);
 
-        $templateNotDisabled = $this->page->template() === 'tribune' &&
-                (!isset($header->tribune['show']) || $header->tribune['show'] !== false);
-        $show = isset($header->tribune['show']) &&  $header->tribune['show'] === true;
+        $isEnabled = $this->getConfig('enabled') ?: true;
+        $templateNotDisabled = $this->page->template() === 'tribune' && $isEnabled !== false;
 
-        if ($templateNotDisabled || $show) {
+        if ($templateNotDisabled || $isEnabled) {
             if ($uri->query('backend') === 'tsv') {
                 $this->handlePost();
                 $this->deliverTSV();
@@ -83,6 +83,16 @@ class TribunePlugin extends Plugin {
             // 'onAssetsInitialize' event has already been fired. Call assets manually.
             $this->addAssets();
         }
+    }
+
+    public function onTwigSiteVariables() {
+        $twig = $this->grav['twig'];
+
+        $twigVars = [
+            'enabled' => $this->getConfig('enabled'),
+        ];
+
+        $twig->twig_vars['tribune'] = $twigVars;
     }
 
     private function addAssets() {

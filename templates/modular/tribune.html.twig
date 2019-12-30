@@ -1,3 +1,5 @@
-{% include 'partials/tribune.html.twig' %}
+{% if tribune.enabled %}
+    {% include 'partials/tribune.html.twig' %}
+{% endif %}
 
 {{ content|raw }}

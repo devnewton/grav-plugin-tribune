@@ -1,6 +1,7 @@
 ---
 title: Blog item w/ Tribune
 tribune:
-    show: true
+    enabled: true
+    maxPosts: 200  # override global configuration
 ---
 This is a blog item

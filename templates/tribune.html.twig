@@ -1,7 +1,7 @@
 {% extends 'partials/base.html.twig' %}
 
 {% block content %}
-    {% if page.header.tribune.show %}
+    {% if tribune.enabled %}
         {% include 'partials/tribune.html.twig' %}
     {% endif %}
 
