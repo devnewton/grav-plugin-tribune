@@ -1,5 +1,9 @@
 {% extends 'partials/base.html.twig' %}
 
 {% block content %}
+    {% if tribune.enabled %}
+        {% include 'partials/tribune.html.twig' %}
+    {% endif %}
+
     {{ page.content }}
 {% endblock %}

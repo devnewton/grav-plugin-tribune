@@ -12,6 +12,10 @@ use RocketTheme\Toolbox\Event\Event;
  */
 class TribunePlugin extends Plugin {
 
+    private $page = null;
+    private $runBackwardsCompatible = false;
+    private $mergedConfig = null;
+
     /**
      * @return array
      *
@@ -25,7 +29,7 @@ class TribunePlugin extends Plugin {
     public static function getSubscribedEvents() {
         return [
             'onPluginsInitialized' => ['onPluginsInitialized', 0],
-            'onTwigTemplatePaths'       => ['onTwigTemplatePaths', 0]
+            'onTwigTemplatePaths'  => ['onTwigTemplatePaths', 0],
         ];
     }
 
@@ -36,8 +40,10 @@ class TribunePlugin extends Plugin {
         }
 
         $uri = $this->grav['uri'];
-        $page = $this->config->get('plugins.tribune.page');
-        if ($page && $uri->path() == $page) {
+        $pagePath = $this->config->get('plugins.tribune.page');
+        $this->runBackwardsCompatible = $pagePath && $uri->path() == $pagePath;
+
+        if ($this->runBackwardsCompatible) {
             if ($uri->query('backend') === 'tsv') {
                 $this->handlePost();
                 $this->enable([
@@ -50,6 +56,55 @@ class TribunePlugin extends Plugin {
                     'onAssetsInitialized' => ['onAssetsInitialized', 0]
                 ]);
             }
+        } else {
+            $this->enable([
+                'onPageInitialized' => ['onPageInitialized', 0],
+                'onTwigSiteVariables' => ['onTwigSiteVariables'],
+            ]);
+        }
+    }
+
+    public function onPageInitialized($event) {
+        $this->page = $event['page'];
+        $header = $this->page->header();
+        $uri = $this->grav['uri'];
+
+        $this->mergedConfig = $this->mergeConfig($this->page);
+
+        $isEnabled = $this->getConfig('enabled') ?: true;
+        $templateNotDisabled = $this->page->template() === 'tribune' && $isEnabled !== false;
+
+        if ($templateNotDisabled || $isEnabled) {
+            if ($uri->query('backend') === 'tsv') {
+                $this->handlePost();
+                $this->deliverTSV();
+            }
+
+            // 'onAssetsInitialize' event has already been fired. Call assets manually.
+            $this->addAssets();
+        }
+    }
+
+    public function onTwigSiteVariables() {
+        $twig = $this->grav['twig'];
+
+        $twigVars = [
+            'enabled' => $this->getConfig('enabled'),
+        ];
+
+        $twig->twig_vars['tribune'] = $twigVars;
+    }
+
+    private function addAssets() {
+        $this->onAssetsInitialized();
+    }
+
+    private function getConfig($item) {
+        if ($this->runBackwardsCompatible) {
+            return $this->config->get($item);
+        } else {
+            $slices = array_slice(\explode('.', $item), -1);
+            return $this->mergedConfig->get($slices[0]);
         }
     }
 
@@ -62,7 +117,7 @@ class TribunePlugin extends Plugin {
     public function onPageContentRaw(Event $e) {
         $this->addTribuneHtmlToPageIfNeeded($e['page']);
     }
-    
+
     private function addTribuneHtmlToPageIfNeeded($page) {
         $content = $page->getRawContent();
         if(mb_strstr($content, 'tribune-backend2html') === FALSE) {
@@ -79,37 +134,44 @@ class TribunePlugin extends Plugin {
 	</fieldset>
     </form>
 <div id="tribune" class="tribune"></div>
-<script id="tribune-backend2html" type="text/peg">
-COIN
-                .
-                file_get_contents(__DIR__ . '/backend2html.pegjs')
-                .
-                <<<COIN
-</script>
 COIN;
             $page->setRawContent($text . "\n\n" . $content);
         }
     }
 
     public function onAssetsInitialized() {
-        if ($this->config->get('plugins.tribune.style')) {
-            $this->grav['assets']->addCss('plugin://tribune/tribune.css');
+        $assetMngr = $this->grav['assets'];
+
+        if ($this->getConfig('plugins.tribune.style')) {
+            $assetMngr->addCss('plugin://tribune/tribune.css');
         }
-        $this->grav['assets']->addJs('plugin://tribune/peg-0.10.0.js', null /* priority */, true /* pipeline */, 'defer');
-        $this->grav['assets']->addJs('plugin://tribune/tribune.js', null /* priority */, true /* pipeline */, 'defer');
+
+        $assetMngr->addJs('plugin://tribune/peg-0.10.0.js',  [
+            'group' => 'head',
+            'loading' => 'defer',
+        ]);
+        $assetMngr->addJs('plugin://tribune/tribune.js', [
+            'group' => 'head',
+            'loading' => 'defer',
+        ]);
+        $assetMngr->addJs('plugin://tribune/backend2html.pegjs', [
+            'id' => 'tribune-backend2html',
+            'group' => 'bottom',
+            'loading' => 'inline',
+        ]);
     }
 
     public function handlePost() {
-        $message = mb_substr(filter_input(INPUT_POST, 'message', FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW), 0, $this->config->get('plugins.tribune.maxMessageLength'));
+        $message = mb_substr(filter_input(INPUT_POST, 'message', FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW), 0, $this->getConfig('plugins.tribune.maxMessageLength'));
         if (mb_strlen(trim($message)) > 0 && mb_detect_encoding($message, 'UTF-8', true)) {
-            $info = trim(mb_substr(filter_input(INPUT_POST, 'info', FILTER_SANITIZE_EMAIL), 0, $this->config->get('plugins.tribune.maxInfoLength')));
+            $info = trim(mb_substr(filter_input(INPUT_POST, 'info', FILTER_SANITIZE_EMAIL), 0, $this->getConfig('plugins.tribune.maxInfoLength')));
             if (mb_strlen($info) === 0) {
-                $info = trim(mb_substr(filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_EMAIL), 0, $this->config->get('plugins.tribune.maxInfoLength')));
+                $info = trim(mb_substr(filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_EMAIL), 0, $this->getConfig('plugins.tribune.maxInfoLength')));
             }
             $login = '';
             if (isset($this->grav['twig'])) {
                 $user = $this->grav['user'];
-                $login = trim(mb_substr($user->get('username', ''), 0, $this->config->get('plugins.tribune.maxLoginLength')));
+                $login = trim(mb_substr($user->get('username', ''), 0, $this->getConfig('plugins.tribune.maxLoginLength')));
             }
             if (!mb_detect_encoding($login, 'UTF-8', true)) {
                 $login = "";
@@ -120,21 +182,32 @@ COIN;
             if (mb_strlen($login) === 0 && mb_strlen($info) === 0) {
                 $info = "coward";
             }
-            $file = fopen(DATA_DIR . 'tribune.tsv', "c+");
+
+            if ($this->runBackwardsCompatible) {
+                $file = fopen(DATA_DIR . 'tribune.tsv', "c+");
+            } else {
+                $foldername = DATA_DIR . 'tribune';
+
+                if (!file_exists($foldername)) {
+                    mkdir($foldername);
+                }
+                $file = fopen(DATA_DIR . 'tribune/' . $this->page->slug() . '.tsv', "c+");
+            }
+
             flock($file, LOCK_EX);
             $newPostId = 0;
             $newPosts = array();
-            $maxLineLength = $this->config->get('plugins.tribune.maxLineLength');
+            $maxLineLength = $this->getConfig('plugins.tribune.maxLineLength');
             while (($post = fgetcsv($file, $maxLineLength, "\t")) !== FALSE) {
                 $newPosts[] = $post;
                 $newPostId = max($newPostId, $post[0]);
             }
             ++$newPostId;
             header('X-Post-Id: ' . $newPostId);
-            $dateTime = date_create("now", timezone_open($this->config->get('plugins.tribune.timezone')));
+            $dateTime = date_create("now", timezone_open($this->getConfig('plugins.tribune.timezone')));
             $time = date_format($dateTime, 'YmdHis');
             array_unshift($newPosts, array($newPostId, $time, $info, $login, $message));
-            array_splice($newPosts, $this->config->get('plugins.tribune.maxPosts'));
+            array_splice($newPosts, $this->getConfig('plugins.tribune.maxPosts'));
             ftruncate($file, 0);
             fseek($file, 0);
             foreach ($newPosts as $post) {
@@ -146,15 +219,27 @@ COIN;
     }
 
     public function deliverTSV() {
+        if ($this->runBackwardsCompatible) {
+            $datafile = DATA_DIR . 'tribune.tsv';
+        } else {
+            $datafile = DATA_DIR . 'tribune/' . $this->page->slug() . '.tsv';
+        }
+
+        if (!file_exists($datafile)) {
+            return;
+        }
+
         $lastId = filter_input(INPUT_GET, 'lastId', FILTER_VALIDATE_INT, array('options' => array('default' => 0)));
         header("Content-Type: text/tab-separated-values");
-        $file = fopen(DATA_DIR . 'tribune.tsv', "r");
+        $file = fopen($datafile, "r");
+
         $posts = array();
-        $maxLineLength = $this->config->get('plugins.tribune.maxLineLength');
+        $maxLineLength = $this->getConfig('plugins.tribune.maxLineLength');
         while (($post = fgetcsv($file, $maxLineLength, "\t")) !== FALSE) {
             $posts[] = $post;
         }
         fclose($file);
+
         $outstream = fopen("php://output", 'w');
         foreach ($posts as $post) {
             if ($post[0] > $lastId) {
@@ -168,7 +253,7 @@ COIN;
 
     public function addTribuneIfItDoesNotExistsPage() {
         $pages = $this->grav['pages'];
-        $route = $this->config->get('plugins.tribune.page');
+        $route = $this->getConfig('plugins.tribune.page');
         $page = $pages->dispatch($route);
         if (!$page) {
             $page = new Page;
@@ -183,5 +268,4 @@ COIN;
         $twig = $this->grav['twig'];
         $twig->twig_paths[] = __DIR__ . '/templates';
     }
-
 }
